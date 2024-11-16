@@ -20,6 +20,16 @@ export const fetchEvents = async () => {
   }
 };
 
+// 특정 이벤트 가져오기 (Event Detail)
+export const fetchEvent = async (eventId) => {
+  try {
+    const response = await axios.get(`${API_URL}/events/${eventId}`);
+    return response.data;
+  } catch (error) {
+    throw handleApiError(error, 'Failed to fetch event details');
+  }
+};
+
 // 회원가입
 export const registerUser = async (userData) => {
   try {
