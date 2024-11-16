@@ -4,14 +4,19 @@ import axios from 'axios';
 
 const API_URL = 'http://localhost:5000/api';
 
+// 에러 처리 함수
+const handleApiError = (error, defaultMessage) => {
+  console.error('Error:', error);
+  return new Error(error.response?.data?.message || defaultMessage);
+};
+
 // 이벤트 목록 가져오기
 export const fetchEvents = async () => {
   try {
     const response = await axios.get(`${API_URL}/events`);
     return response.data;
   } catch (error) {
-    console.error('Error:', error);
-    throw new Error('Failed to fetch events');
+    throw handleApiError(error, 'Failed to fetch events');
   }
 };
 
@@ -25,8 +30,7 @@ export const registerUser = async (userData) => {
     });
     return response.data;
   } catch (error) {
-    console.error('Error:', error);
-    throw new Error(error.response?.data?.message || 'Failed to register user');
+    throw handleApiError(error, 'Failed to register user');
   }
 };
 
@@ -40,8 +44,7 @@ export const loginUser = async (userData) => {
     });
     return response.data;
   } catch (error) {
-    console.error('Error:', error);
-    throw new Error(error.response?.data?.message || 'Failed to login');
+    throw handleApiError(error, 'Failed to login');
   }
 };
 
@@ -49,12 +52,21 @@ export const loginUser = async (userData) => {
 const setAuthHeader = () => {
   const token = localStorage.getItem('token');
   if (token) {
+    const decodedToken = JSON.parse(atob(token.split('.')[1]));
+    const currentTime = Math.floor(Date.now() / 1000);
+
+    if (decodedToken.exp < currentTime) {
+      localStorage.removeItem('token'); // 토큰이 만료되었으면 제거
+      window.location.href = '/login'; // 로그인 페이지로 이동
+      throw new Error('Session expired, please log in again');
+    }
+
     return {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${token}`, // 인증된 사용자 토큰
     };
   }
-  return { 'Content-Type': 'application/json' };
+  throw new Error('No authentication token found');
 };
 
 // 이벤트 생성 API 호출
@@ -64,8 +76,7 @@ export const createEvent = async (eventData) => {
     const response = await axios.post(`${API_URL}/events`, eventData, { headers });
     return response.data;
   } catch (error) {
-    console.error('Error:', error);
-    throw new Error(error.response?.data?.message || 'Failed to create event');
+    throw handleApiError(error, 'Failed to create event');
   }
 };
 
@@ -76,8 +87,7 @@ export const joinEvent = async (eventId) => {
     const response = await axios.post(`${API_URL}/events/${eventId}/join`, {}, { headers });
     return response.data;
   } catch (error) {
-    console.error('Error:', error);
-    throw new Error(error.response?.data?.message || 'Failed to join event');
+    throw handleApiError(error, 'Failed to join event');
   }
 };
 
@@ -88,8 +98,7 @@ export const deleteEvent = async (id) => {
     const response = await axios.delete(`${API_URL}/events/${id}`, { headers });
     return response.data;
   } catch (error) {
-    console.error('Error:', error);
-    throw new Error(error.response?.data?.message || 'Failed to delete event');
+    throw handleApiError(error, 'Failed to delete event');
   }
 };
 
@@ -100,8 +109,7 @@ export const getUserHostedEvents = async () => {
     const response = await axios.get(`${API_URL}/events/user/hosted`, { headers });
     return response.data;
   } catch (error) {
-    console.error('Error:', error);
-    throw new Error(error.response?.data?.message || 'Failed to fetch hosted events');
+    throw handleApiError(error, 'Failed to fetch hosted events');
   }
 };
 
@@ -112,7 +120,6 @@ export const getUserJoinedEvents = async () => {
     const response = await axios.get(`${API_URL}/events/user/joined`, { headers });
     return response.data;
   } catch (error) {
-    console.error('Error:', error);
-    throw new Error(error.response?.data?.message || 'Failed to fetch joined events');
+    throw handleApiError(error, 'Failed to fetch joined events');
   }
 };
