@@ -16,7 +16,7 @@ export default function Login() {
       const data = await loginUser(credentials);
       localStorage.setItem('token', data.token);
       router.push('/'); // 로그인 성공 시 메인 페이지로 이동
-    } catch (error) {
+    } catch {
       setMessage('Invalid email or password');
     }
   };
