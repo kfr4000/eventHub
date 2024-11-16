@@ -38,6 +38,7 @@ exports.registerUser = async (req, res) => {
       token,
     });
   } catch (error) {
+    console.error('Error registering user:', error);
     res.status(500).json({ message: 'Error registering user' });
   }
 };
@@ -71,6 +72,7 @@ exports.loginUser = async (req, res) => {
       token,
     });
   } catch (error) {
+    console.error('Error logging in:', error);
     res.status(500).json({ message: 'Error logging in' });
   }
 };
@@ -91,6 +93,7 @@ exports.getUserProfile = async (req, res) => {
       email: user.email,
     });
   } catch (error) {
+    console.error('Error fetching user profile:', error);
     res.status(500).json({ message: 'Error fetching user profile' });
   }
 };
@@ -114,6 +117,7 @@ exports.updateUserProfile = async (req, res) => {
 
     const updatedUser = await user.save();
 
+    // JWT 토큰 생성
     const token = jwt.sign({ id: updatedUser._id }, process.env.JWT_SECRET, {
       expiresIn: '30d',
     });
@@ -125,6 +129,7 @@ exports.updateUserProfile = async (req, res) => {
       token,
     });
   } catch (error) {
+    console.error('Error updating user profile:', error);
     res.status(500).json({ message: 'Error updating user profile' });
   }
 };
