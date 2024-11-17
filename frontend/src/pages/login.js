@@ -1,4 +1,3 @@
-// frontend/src/pages/login.js
 import { useState } from 'react';
 import { loginUser } from '../utils/api';
 import { Form, Button, Container } from 'react-bootstrap';
@@ -12,6 +11,10 @@ export default function Login() {
   const handleLogin = async (e) => {
     e.preventDefault();
     setMessage(null);
+    
+    // 로그인 요청 전 데이터 확인
+    console.log('Credentials:', credentials);
+
     try {
       const data = await loginUser(credentials);
       localStorage.setItem('token', data.token);
