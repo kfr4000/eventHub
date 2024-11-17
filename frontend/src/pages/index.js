@@ -99,7 +99,7 @@ export default function Home() {
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
               />
-              <Dropdown onSelect={setEventType} className="me-2">
+              <Dropdown onSelect={(eventKey) => setEventType(eventKey)} className="me-2">
                 <Dropdown.Toggle variant="outline-secondary">
                   {eventType || 'Event Type'}
                 </Dropdown.Toggle>
