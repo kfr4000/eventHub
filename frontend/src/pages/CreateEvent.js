@@ -1,30 +1,53 @@
+// frontend/src/pages/CreateEvent.js
+
 import { useState } from 'react';
-import { createEvent } from '../utils/api';
-import { Form, Button, Container } from 'react-bootstrap';
+import { Container, Form, Button } from 'react-bootstrap';
+import { useRouter } from 'next/router';
 
 export default function CreateEvent() {
+  const [organizer, setOrganizer] = useState('');
   const [name, setName] = useState('');
+  const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [date, setDate] = useState('');
   const [location, setLocation] = useState('');
+  const [imageUrl, setImageUrl] = useState('');
   const [message, setMessage] = useState(null);
+
+  const router = useRouter();
 
   const handleCreateEvent = async (e) => {
     e.preventDefault();
     setMessage(null);
 
-    const token = localStorage.getItem('token'); // 로그인한 사용자의 토큰 가져오기
-    if (!token) {
-      setMessage('Please log in to create an event.');
+    if (!organizer || !name || !title || !description || !date || !location || !imageUrl) {
+      setMessage('All fields are required. Please fill out every field.');
       return;
     }
 
     try {
-      const eventData = { name, description, date, location };
-      const data = await createEvent(eventData, token);
-      setMessage(`Event "${data.name}" created successfully!`);
+      const response = await fetch('http://localhost:5000/api/events', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ organizer, name, title, description, date, location, imageUrl }),
+      });
+
+      if (response.ok) {
+        setMessage('Event created successfully!');
+        router.push('/');
+      } else {
+        const errorData = await response.json();
+        if (errorData.errors) {
+          const errorMessages = Object.values(errorData.errors).map((err) => err.message).join(', ');
+          setMessage(`Failed to create event: ${errorMessages}`);
+        } else {
+          setMessage(`Failed to create event: ${errorData.message}`);
+        }
+      }
     } catch (error) {
-      setMessage(error.message);
+      setMessage(`Failed to create event: ${error.message}`);
     }
   };
 
@@ -32,7 +55,16 @@ export default function CreateEvent() {
     <Container className="my-4">
       <h1>Create Event</h1>
       <Form onSubmit={handleCreateEvent}>
-        <Form.Group controlId="formEventName" className="mb-3">
+        <Form.Group className="mb-3">
+          <Form.Label>Organizer</Form.Label>
+          <Form.Control
+            type="text"
+            value={organizer}
+            onChange={(e) => setOrganizer(e.target.value)}
+            required
+          />
+        </Form.Group>
+        <Form.Group className="mb-3">
           <Form.Label>Event Name</Form.Label>
           <Form.Control
             type="text"
@@ -41,7 +73,16 @@ export default function CreateEvent() {
             required
           />
         </Form.Group>
-        <Form.Group controlId="formEventDescription" className="mb-3">
+        <Form.Group className="mb-3">
+          <Form.Label>Title</Form.Label>
+          <Form.Control
+            type="text"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            required
+          />
+        </Form.Group>
+        <Form.Group className="mb-3">
           <Form.Label>Description</Form.Label>
           <Form.Control
             as="textarea"
@@ -51,7 +92,7 @@ export default function CreateEvent() {
             required
           />
         </Form.Group>
-        <Form.Group controlId="formEventDate" className="mb-3">
+        <Form.Group className="mb-3">
           <Form.Label>Date</Form.Label>
           <Form.Control
             type="date"
@@ -60,7 +101,7 @@ export default function CreateEvent() {
             required
           />
         </Form.Group>
-        <Form.Group controlId="formEventLocation" className="mb-3">
+        <Form.Group className="mb-3">
           <Form.Label>Location</Form.Label>
           <Form.Control
             type="text"
@@ -69,11 +110,20 @@ export default function CreateEvent() {
             required
           />
         </Form.Group>
+        <Form.Group className="mb-3">
+          <Form.Label>Image URL</Form.Label>
+          <Form.Control
+            type="text"
+            value={imageUrl}
+            onChange={(e) => setImageUrl(e.target.value)}
+            required
+          />
+        </Form.Group>
         <Button variant="primary" type="submit">
           Create Event
         </Button>
       </Form>
-      {message && <p className="mt-3">{message}</p>}
+      {message && <p className="mt-3 text-danger">{message}</p>}
     </Container>
   );
 }

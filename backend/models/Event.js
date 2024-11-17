@@ -1,33 +1,36 @@
+// backend/models/Event.js
+
 const mongoose = require('mongoose');
 
-const EventSchema = new mongoose.Schema({
+const eventSchema = new mongoose.Schema({
+  organizer: {
+    type: String,
+    required: [true, 'Organizer is required'],
+  },
   name: {
     type: String,
-    required: true,
+    required: [true, 'Event name is required'],
+  },
+  title: {
+    type: String,
+    required: [true, 'Title is required'],
   },
   description: {
     type: String,
-    required: true,
+    required: [true, 'Description is required'],
   },
   date: {
     type: Date,
-    required: true,
+    required: [true, 'Date is required'],
   },
   location: {
     type: String,
-    required: true,
+    required: [true, 'Location is required'],
   },
-  organizer: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-    required: true,
+  imageUrl: {
+    type: String,
+    required: [true, 'Image URL is required'],
   },
-  attendees: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
-    },
-  ],
 });
 
-module.exports = mongoose.model('Event', EventSchema);
+module.exports = mongoose.model('Event', eventSchema);

@@ -1,4 +1,4 @@
-// frontend/src/pages/EventDetail/[id].js
+// frontend/src/pages/event/[id].js
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
@@ -13,11 +13,11 @@ export default function EventDetail() {
 
   useEffect(() => {
     if (id) {
-      fetchEventDetails();
+      fetchEventDetail();
     }
   }, [id]);
 
-  const fetchEventDetails = async () => {
+  const fetchEventDetail = async () => {
     try {
       const response = await fetch(`http://localhost:5000/api/events/${id}`);
       if (!response.ok) {
