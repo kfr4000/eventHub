@@ -1,6 +1,7 @@
 // frontend/src/pages/event/[id].js
 
-import { useState, useEffect } from 'react';
+import React from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/router';
 import { Container, Row, Col, Image, Button } from 'react-bootstrap';
 
@@ -11,13 +12,8 @@ export default function EventDetail() {
   const router = useRouter();
   const { id } = router.query;
 
-  useEffect(() => {
-    if (id) {
-      fetchEventDetail();
-    }
-  }, [id]);
-
-  const fetchEventDetail = async () => {
+  const fetchEventDetail = useCallback(async () => {
+    if (!id) return;
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/events/${id}`);
       if (!response.ok) {
@@ -30,7 +26,11 @@ export default function EventDetail() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [id]);
+
+  useEffect(() => {
+    fetchEventDetail();
+  }, [fetchEventDetail]);
 
   if (loading) {
     return <Container className="my-4">Loading...</Container>;

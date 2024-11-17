@@ -1,5 +1,3 @@
-// backend/index.js
-
 const express = require('express');
 const PORT = process.env.PORT || 5000;
 const connectDB = require('./config/db');
@@ -30,6 +28,12 @@ app.get('/', (req, res) => {
 app.use('/api/events', eventRoutes);
 app.use('/api/users', userRoutes);
 
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
-});
+// 서버를 실행하는 대신, app을 내보냄
+if (require.main === module) {
+  app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+  });
+}
+
+// 테스트용으로 app을 내보냄
+module.exports = app;

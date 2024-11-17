@@ -1,6 +1,6 @@
 // frontend/src/pages/register.js
 
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { registerUser } from '../utils/api';
 import { Form, Button, Container } from 'react-bootstrap';
 import Link from 'next/link';

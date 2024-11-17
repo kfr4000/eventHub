@@ -1,7 +1,7 @@
 // frontend/src/pages/CreateEvent.js
 
-import { useState } from 'react';
-import { Container, Form, Button } from 'react-bootstrap';
+import React, { useState } from 'react';
+import { Container, Form, Button, Spinner } from 'react-bootstrap';
 import { useRouter } from 'next/router';
 
 export default function CreateEvent() {
@@ -13,20 +13,23 @@ export default function CreateEvent() {
   const [location, setLocation] = useState('');
   const [imageUrl, setImageUrl] = useState('');
   const [message, setMessage] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   const router = useRouter();
 
   const handleCreateEvent = async (e) => {
     e.preventDefault();
     setMessage(null);
+    setLoading(true);
 
     if (!organizer || !name || !title || !description || !date || !location || !imageUrl) {
       setMessage('All fields are required. Please fill out every field.');
+      setLoading(false);
       return;
     }
 
     try {
-      const response = await fetch('http://localhost:5000/api/events', {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/events`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -36,7 +39,9 @@ export default function CreateEvent() {
 
       if (response.ok) {
         setMessage('Event created successfully!');
-        router.push('/');
+        setTimeout(() => {
+          router.push('/');
+        }, 1500);
       } else {
         const errorData = await response.json();
         if (errorData.errors) {
@@ -48,6 +53,8 @@ export default function CreateEvent() {
       }
     } catch (error) {
       setMessage(`Failed to create event: ${error.message}`);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -119,8 +126,21 @@ export default function CreateEvent() {
             required
           />
         </Form.Group>
-        <Button variant="primary" type="submit">
-          Create Event
+        <Button variant="primary" type="submit" disabled={loading}>
+          {loading ? (
+            <>
+              <Spinner
+                as="span"
+                animation="border"
+                size="sm"
+                role="status"
+                aria-hidden="true"
+              />{' '}
+              Creating...
+            </>
+          ) : (
+            'Create Event'
+          )}
         </Button>
       </Form>
       {message && <p className="mt-3 text-danger">{message}</p>}

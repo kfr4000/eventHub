@@ -1,7 +1,8 @@
 // frontend/src/pages/index.js
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Container, Button, Row, Col, Navbar, Form, FormControl, Carousel, Nav, Dropdown } from 'react-bootstrap';
+import Image from 'next/image';
 import EventCard from '../components/EventCard';
 
 export default function Home() {
@@ -13,21 +14,21 @@ export default function Home() {
   // API URL 설정
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 
-  useEffect(() => {
-    // API 호출하여 이벤트 목록 가져오기
-    const fetchEvents = async () => {
-      try {
-        const response = await fetch(`${apiUrl}/events`);
-        if (!response.ok) {
-          throw new Error('Failed to fetch events');
-        }
-        const data = await response.json();
-        setEvents(Array.isArray(data) ? data : []);
-      } catch (error) {
-        console.error('Error fetching events:', error);
+  // 이벤트 목록 가져오기 함수 (useCallback으로 메모이제이션)
+  const fetchEvents = useCallback(async () => {
+    try {
+      const response = await fetch(`${apiUrl}/events`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch events');
       }
-    };
+      const data = await response.json();
+      setEvents(Array.isArray(data) ? data : []);
+    } catch (error) {
+      console.error('Error fetching events:', error);
+    }
+  }, [apiUrl]);
 
+  useEffect(() => {
     fetchEvents();
 
     // 사용자의 위치 자동 감지
@@ -59,7 +60,7 @@ export default function Home() {
     } else {
       setLocation('Tokyo'); // 기본값으로 도쿄 설정
     }
-  }, [apiUrl]);
+  }, [fetchEvents]);
 
   const handleSearch = async (e) => {
     e.preventDefault();
@@ -135,10 +136,12 @@ export default function Home() {
       {/* 메인 배너 슬라이드 */}
       <Carousel className="my-4">
         <Carousel.Item>
-          <img
+          <Image
             className="d-block w-100"
             src="https://via.placeholder.com/1200x400?text=Autumn+Fairs+%26+Festivals"
             alt="First slide"
+            width={1200}
+            height={400}
           />
           <Carousel.Caption>
             <h3>Autumn Fairs & Festivals</h3>
@@ -146,10 +149,12 @@ export default function Home() {
           </Carousel.Caption>
         </Carousel.Item>
         <Carousel.Item>
-          <img
+          <Image
             className="d-block w-100"
             src="https://via.placeholder.com/1200x400?text=Supper+Club+Parties"
             alt="Second slide"
+            width={1200}
+            height={400}
           />
           <Carousel.Caption>
             <h3>Supper Club Parties</h3>
@@ -157,14 +162,16 @@ export default function Home() {
           </Carousel.Caption>
         </Carousel.Item>
         <Carousel.Item>
-          <img
+          <Image
             className="d-block w-100"
             src="https://via.placeholder.com/1200x400?text=Stay+Connected+with+Local+Events"
             alt="Third slide"
+            width={1200}
+            height={400}
           />
           <Carousel.Caption>
             <h3>Stay Connected with Local Events</h3>
-            <p>Never miss out on what's happening around you.</p>
+            <p>Never miss out on what&apos;s happening around you.</p>
           </Carousel.Caption>
         </Carousel.Item>
       </Carousel>
@@ -175,37 +182,37 @@ export default function Home() {
         <Row className="text-center">
           <Col md={2} className="mb-4">
             <div className="event-category-icon">
-              <img src="https://via.placeholder.com/100?text=Music" alt="Music" className="mb-2" />
+              <Image src="https://via.placeholder.com/100?text=Music" alt="Music" className="mb-2" width={100} height={100} />
               <h5>Music</h5>
             </div>
           </Col>
           <Col md={2} className="mb-4">
             <div className="event-category-icon">
-              <img src="https://via.placeholder.com/100?text=Nightlife" alt="Nightlife" className="mb-2" />
+              <Image src="https://via.placeholder.com/100?text=Nightlife" alt="Nightlife" className="mb-2" width={100} height={100} />
               <h5>Nightlife</h5>
             </div>
           </Col>
           <Col md={2} className="mb-4">
             <div className="event-category-icon">
-              <img src="https://via.placeholder.com/100?text=Arts" alt="Arts & Theatre" className="mb-2" />
+              <Image src="https://via.placeholder.com/100?text=Arts" alt="Arts & Theatre" className="mb-2" width={100} height={100} />
               <h5>Arts & Theatre</h5>
             </div>
           </Col>
           <Col md={2} className="mb-4">
             <div className="event-category-icon">
-              <img src="https://via.placeholder.com/100?text=Sports" alt="Sports" className="mb-2" />
+              <Image src="https://via.placeholder.com/100?text=Sports" alt="Sports" className="mb-2" width={100} height={100} />
               <h5>Sports</h5>
             </div>
           </Col>
           <Col md={2} className="mb-4">
             <div className="event-category-icon">
-              <img src="https://via.placeholder.com/100?text=Business" alt="Business" className="mb-2" />
+              <Image src="https://via.placeholder.com/100?text=Business" alt="Business" className="mb-2" width={100} height={100} />
               <h5>Business</h5>
             </div>
           </Col>
           <Col md={2} className="mb-4">
             <div className="event-category-icon">
-              <img src="https://via.placeholder.com/100?text=Food" alt="Food & Drink" className="mb-2" />
+              <Image src="https://via.placeholder.com/100?text=Food" alt="Food & Drink" className="mb-2" width={100} height={100} />
               <h5>Food & Drink</h5>
             </div>
           </Col>

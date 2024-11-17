@@ -1,6 +1,6 @@
-// frontend/src/pages/EventDetail/[id].js
+// frontend/src/pages/EventDetail.js
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/router';
 import { Container, Row, Col, Image, Button } from 'react-bootstrap';
 
@@ -11,15 +11,10 @@ export default function EventDetail() {
   const router = useRouter();
   const { id } = router.query;
 
-  useEffect(() => {
-    if (id) {
-      fetchEventDetails();
-    }
-  }, [id]);
-
-  const fetchEventDetails = async () => {
+  const fetchEventDetails = useCallback(async () => {
+    if (!id) return;
     try {
-      const response = await fetch(`http://localhost:5000/api/events/${id}`);
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/events/${id}`);
       if (!response.ok) {
         throw new Error('Failed to fetch event details');
       }
@@ -30,7 +25,11 @@ export default function EventDetail() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [id]);
+
+  useEffect(() => {
+    fetchEventDetails();
+  }, [fetchEventDetails]);
 
   if (loading) {
     return <Container className="my-4">Loading...</Container>;
