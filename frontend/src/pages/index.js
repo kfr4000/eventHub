@@ -10,30 +10,46 @@ export default function Home() {
   const [eventType, setEventType] = useState('');
   const [location, setLocation] = useState('');
 
+  // API URL 설정
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+
   useEffect(() => {
     // API 호출하여 이벤트 목록 가져오기
-    fetch('http://localhost:5000/api/events')
-      .then((response) => response.json())
-      .then((data) => setEvents(data));
+    const fetchEvents = async () => {
+      try {
+        const response = await fetch(`${apiUrl}/events`);
+        if (!response.ok) {
+          throw new Error('Failed to fetch events');
+        }
+        const data = await response.json();
+        setEvents(Array.isArray(data) ? data : []);
+      } catch (error) {
+        console.error('Error fetching events:', error);
+      }
+    };
+
+    fetchEvents();
 
     // 사용자의 위치 자동 감지
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
-        (position) => {
-          const { latitude, longitude } = position.coords;
-          fetch(`https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json`)
-            .then((response) => response.json())
-            .then((data) => {
-              if (data.address && data.address.city) {
-                setLocation(data.address.city);
-              } else {
-                setLocation('Tokyo'); // 기본값으로 도쿄 설정
-              }
-            })
-            .catch((error) => {
-              console.error('Error fetching location:', error);
+        async (position) => {
+          try {
+            const { latitude, longitude } = position.coords;
+            const response = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json`);
+            if (!response.ok) {
+              throw new Error('Failed to fetch location');
+            }
+            const data = await response.json();
+            if (data.address && data.address.city) {
+              setLocation(data.address.city);
+            } else {
               setLocation('Tokyo'); // 기본값으로 도쿄 설정
-            });
+            }
+          } catch (error) {
+            console.error('Error fetching location:', error);
+            setLocation('Tokyo'); // 기본값으로 도쿄 설정
+          }
         },
         (error) => {
           console.error('Error getting geolocation:', error);
@@ -43,13 +59,20 @@ export default function Home() {
     } else {
       setLocation('Tokyo'); // 기본값으로 도쿄 설정
     }
-  }, []);
+  }, [apiUrl]);
 
-  const handleSearch = (e) => {
+  const handleSearch = async (e) => {
     e.preventDefault();
-    fetch(`http://localhost:5000/api/events?search=${searchTerm}&type=${eventType}&location=${location}`)
-      .then((response) => response.json())
-      .then((data) => setEvents(data));
+    try {
+      const response = await fetch(`${apiUrl}/events?search=${searchTerm}&type=${eventType}&location=${location}`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch search results');
+      }
+      const data = await response.json();
+      setEvents(Array.isArray(data) ? data : []);
+    } catch (error) {
+      console.error('Error fetching search results:', error);
+    }
   };
 
   const handleEventTypeChange = (type) => {
@@ -193,7 +216,7 @@ export default function Home() {
       <Container className="my-4">
         <h2>Recommended for You</h2>
         <Row>
-          {events.slice(0, 3).map((event, index) => (
+          {Array.isArray(events) && events.slice(0, 3).map((event, index) => (
             <EventCard key={event._id || index} event={event} index={index} />
           ))}
         </Row>
@@ -203,14 +226,14 @@ export default function Home() {
       <Container className="my-4">
         <h2>Upcoming Events</h2>
         <Row>
-          {events.length > 0 ? (
+          {Array.isArray(events) && events.length > 0 ? (
             events.map((event, index) => (
               <EventCard key={event._id || index} event={event} index={index} />
             ))
           ) : (
             // 예시 이벤트 카드 표시
             Array.from({ length: 6 }).map((_, index) => (
-              <EventCard key={index} event={{}} index={index} />
+              <EventCard key={index} event={{ title: `Sample Event ${index + 1}`, description: "Join us for an exciting event you will never forget." }} index={index} />
             ))
           )}
         </Row>

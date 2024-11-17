@@ -1,3 +1,5 @@
+// backend/middleware/authMiddleware.js
+
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 
@@ -27,4 +29,20 @@ const protect = async (req, res, next) => {
   }
 };
 
-module.exports = { protect };
+const verifyUser = (req, res, next) => {
+  if (req.user) {
+    next();
+  } else {
+    res.status(401).json({ message: 'Unauthorized' });
+  }
+};
+
+const verifyAdmin = (req, res, next) => {
+  if (req.user && req.user.isAdmin) {
+    next();
+  } else {
+    res.status(403).json({ message: 'Not authorized as an admin' });
+  }
+};
+
+module.exports = { protect, verifyUser, verifyAdmin };
