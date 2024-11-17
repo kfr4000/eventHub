@@ -1,33 +1,35 @@
-// frontend/src/pages/register.js
-
 import React, { useState } from 'react';
 import { registerUser } from '../utils/api';
-import { Form, Button, Container } from 'react-bootstrap';
+import { Form, Button, Container, Spinner } from 'react-bootstrap';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 
 export default function Register() {
-  const [username, setUsername] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [formData, setFormData] = useState({ username: '', email: '', password: '' });
   const [message, setMessage] = useState(null);
+  const [loading, setLoading] = useState(false);
 
-  // useRouter는 컴포넌트 함수 내부에 선언
   const router = useRouter();
 
   const handleRegister = async (e) => {
     e.preventDefault();
     setMessage(null);
+    setLoading(true);
     try {
-      const data = await registerUser({ username, email, password });
-      localStorage.setItem('token', data.token); // 회원가입 후 받은 토큰 저장 (자동 로그인)
+      const data = await registerUser(formData);
+      localStorage.setItem('token', data.token);
       setMessage(`Registration successful! Welcome, ${data.username}`);
-
-      // 회원가입 후 로그인 페이지로 자동 이동
-      router.push('/login');
+      router.push('/'); // Automatically log in and redirect to the homepage
     } catch (error) {
       setMessage(error.message);
+    } finally {
+      setLoading(false);
     }
+  };
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prevData) => ({ ...prevData, [name]: value }));
   };
 
   return (
@@ -38,8 +40,9 @@ export default function Register() {
           <Form.Label>Username</Form.Label>
           <Form.Control
             type="text"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
+            name="username"
+            value={formData.username}
+            onChange={handleChange}
             required
           />
         </Form.Group>
@@ -47,8 +50,9 @@ export default function Register() {
           <Form.Label>Email</Form.Label>
           <Form.Control
             type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            name="email"
+            value={formData.email}
+            onChange={handleChange}
             required
           />
         </Form.Group>
@@ -56,16 +60,24 @@ export default function Register() {
           <Form.Label>Password</Form.Label>
           <Form.Control
             type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            name="password"
+            value={formData.password}
+            onChange={handleChange}
             required
           />
         </Form.Group>
-        <Button variant="primary" type="submit">
-          Register
+        <Button variant="primary" type="submit" disabled={loading}>
+          {loading ? (
+            <>
+              <Spinner as="span" animation="border" size="sm" role="status" aria-hidden="true" />{' '}
+              Registering...
+            </>
+          ) : (
+            'Register'
+          )}
         </Button>
       </Form>
-      {message && <p className="mt-3">{message}</p>}
+      {message && <p className="mt-3 text-danger">{message}</p>}
       <p className="mt-3">
         Already have an account? <Link href="/login">Login here</Link>
       </p>

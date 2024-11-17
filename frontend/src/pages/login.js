@@ -1,26 +1,27 @@
 import React, { useState } from 'react';
 import { loginUser } from '../utils/api';
-import { Form, Button, Container } from 'react-bootstrap';
+import { Form, Button, Container, Spinner } from 'react-bootstrap';
 import { useRouter } from 'next/router';
 
 export default function Login() {
   const [credentials, setCredentials] = useState({ email: '', password: '' });
   const [message, setMessage] = useState(null);
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
 
   const handleLogin = async (e) => {
     e.preventDefault();
     setMessage(null);
-    
-    // 로그인 요청 전 데이터 확인
-    console.log('Credentials:', credentials);
+    setLoading(true);
 
     try {
       const data = await loginUser(credentials);
       localStorage.setItem('token', data.token);
       router.push('/'); // 로그인 성공 시 메인 페이지로 이동
-    } catch {
+    } catch (error) {
       setMessage('Invalid email or password');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -46,8 +47,15 @@ export default function Login() {
             required
           />
         </Form.Group>
-        <Button variant="primary" type="submit" className="mt-3">
-          Login
+        <Button variant="primary" type="submit" className="mt-3" disabled={loading}>
+          {loading ? (
+            <>
+              <Spinner as="span" animation="border" size="sm" role="status" aria-hidden="true" />{' '}
+              Logging in...
+            </>
+          ) : (
+            'Login'
+          )}
         </Button>
         {message && <p className="mt-3 text-danger">{message}</p>}
       </Form>

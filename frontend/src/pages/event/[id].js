@@ -1,9 +1,8 @@
 // frontend/src/pages/event/[id].js
 
-import React from 'react';
-import { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/router';
-import { Container, Row, Col, Image, Button } from 'react-bootstrap';
+import { Container, Row, Col, Image, Button, Spinner } from 'react-bootstrap';
 
 export default function EventDetail() {
   const [event, setEvent] = useState(null);
@@ -33,18 +32,28 @@ export default function EventDetail() {
   }, [fetchEventDetail]);
 
   if (loading) {
-    return <Container className="my-4">Loading...</Container>;
+    return (
+      <Container className="my-4">
+        <Spinner animation="border" role="status">
+          <span className="visually-hidden">Loading...</span>
+        </Spinner>
+      </Container>
+    );
   }
 
   if (error) {
     return <Container className="my-4">Error: {error}</Container>;
   }
 
+  if (!event) {
+    return <Container className="my-4">Event not found.</Container>;
+  }
+
   return (
     <Container className="my-4">
       <Row>
         <Col md={6}>
-          <Image src={event.imageUrl} alt={event.title} fluid />
+          <Image src={event.imageUrl || 'https://via.placeholder.com/600x400?text=No+Image+Available'} alt={event.title} fluid />
         </Col>
         <Col md={6}>
           <h1>{event.title}</h1>

@@ -1,15 +1,27 @@
 // frontend/src/pages/_app.js
+
 import 'bootstrap/dist/css/bootstrap.min.css';
-import '../../styles/globals.css'; // 다른 스타일 파일들도 임포트 가능
-import React from 'react';
-import { useEffect } from 'react';
+import '../../styles/globals.css';
+import React, { useEffect } from 'react';
+import Head from 'next/head';
 
 function MyApp({ Component, pageProps }) {
   useEffect(() => {
-    // Bootstrap의 자바스크립트 관련 코드가 필요하다면 여기에 작성
+    if (typeof window !== 'undefined') {
+      // Bootstrap의 자바스크립트 관련 코드가 필요하다면 여기에 작성
+      import('bootstrap/dist/js/bootstrap.bundle.min.js').catch(err => console.error("Bootstrap JS load error:", err));
+    }
   }, []);
-  
-  return <Component {...pageProps} />;
+
+  return (
+    <>
+      <Head>
+        <title>EventHub</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+      </Head>
+      <Component {...pageProps} />
+    </>
+  );
 }
 
 export default MyApp;

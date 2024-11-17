@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/router';
-import { Container, Row, Col, Image, Button } from 'react-bootstrap';
+import { Container, Row, Col, Image, Button, Spinner } from 'react-bootstrap';
 
 export default function EventDetail() {
   const [event, setEvent] = useState(null);
@@ -14,14 +14,18 @@ export default function EventDetail() {
   const fetchEventDetails = useCallback(async () => {
     if (!id) return;
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/events/${id}`);
+      const controller = new AbortController();
+      const signal = controller.signal;
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/events/${id}`, { signal });
       if (!response.ok) {
         throw new Error('Failed to fetch event details');
       }
       const data = await response.json();
       setEvent(data);
     } catch (err) {
-      setError(err.message);
+      if (err.name !== 'AbortError') {
+        setError(err.message);
+      }
     } finally {
       setLoading(false);
     }
@@ -29,21 +33,34 @@ export default function EventDetail() {
 
   useEffect(() => {
     fetchEventDetails();
+    return () => {
+      setLoading(false);
+    };
   }, [fetchEventDetails]);
 
   if (loading) {
-    return <Container className="my-4">Loading...</Container>;
+    return (
+      <Container className="my-4">
+        <Spinner animation="border" role="status">
+          <span className="visually-hidden">Loading...</span>
+        </Spinner>
+      </Container>
+    );
   }
 
   if (error) {
     return <Container className="my-4">Error: {error}</Container>;
   }
 
+  if (!event) {
+    return <Container className="my-4">Event not found.</Container>;
+  }
+
   return (
     <Container className="my-4">
       <Row>
         <Col md={6}>
-          <Image src={event.imageUrl} alt={event.title} fluid />
+          <Image src={event.imageUrl || 'https://via.placeholder.com/600x400?text=No+Image+Available'} alt={event.title} fluid />
         </Col>
         <Col md={6}>
           <h1>{event.title}</h1>

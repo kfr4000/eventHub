@@ -8,7 +8,7 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 const handleApiError = (error, defaultMessage) => {
   console.error('API Error:', error.response || error.message);
   if (error.response && error.response.data) {
-    console.log('Error response data:', error.response.data); // 에러 데이터 로그
+    console.error('Error response data:', error.response.data); // 에러 데이터 로그
   }
   return new Error(error.response?.data?.message || defaultMessage);
 };
@@ -25,7 +25,6 @@ const setAuthHeader = () => {
 
   if (decodedToken.exp < currentTime) {
     localStorage.removeItem('token'); // 토큰이 만료되었으면 제거
-    window.location.href = '/login'; // 로그인 페이지로 이동
     throw new Error('Session expired, please log in again');
   }
 

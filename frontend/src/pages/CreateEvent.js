@@ -5,24 +5,30 @@ import { Container, Form, Button, Spinner } from 'react-bootstrap';
 import { useRouter } from 'next/router';
 
 export default function CreateEvent() {
-  const [organizer, setOrganizer] = useState('');
-  const [name, setName] = useState('');
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
-  const [date, setDate] = useState('');
-  const [location, setLocation] = useState('');
-  const [imageUrl, setImageUrl] = useState('');
+  const [formData, setFormData] = useState({
+    organizer: '',
+    name: '',
+    title: '',
+    description: '',
+    date: '',
+    location: '',
+    imageUrl: ''
+  });
   const [message, setMessage] = useState(null);
   const [loading, setLoading] = useState(false);
-
   const router = useRouter();
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prevData) => ({ ...prevData, [name]: value }));
+  };
 
   const handleCreateEvent = async (e) => {
     e.preventDefault();
     setMessage(null);
     setLoading(true);
 
-    if (!organizer || !name || !title || !description || !date || !location || !imageUrl) {
+    if (Object.values(formData).some((field) => !field)) {
       setMessage('All fields are required. Please fill out every field.');
       setLoading(false);
       return;
@@ -34,7 +40,7 @@ export default function CreateEvent() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ organizer, name, title, description, date, location, imageUrl }),
+        body: JSON.stringify(formData),
       });
 
       if (response.ok) {
@@ -44,12 +50,7 @@ export default function CreateEvent() {
         }, 1500);
       } else {
         const errorData = await response.json();
-        if (errorData.errors) {
-          const errorMessages = Object.values(errorData.errors).map((err) => err.message).join(', ');
-          setMessage(`Failed to create event: ${errorMessages}`);
-        } else {
-          setMessage(`Failed to create event: ${errorData.message}`);
-        }
+        setMessage(`Failed to create event: ${errorData.message || 'Unknown error'}`);
       }
     } catch (error) {
       setMessage(`Failed to create event: ${error.message}`);
@@ -62,81 +63,24 @@ export default function CreateEvent() {
     <Container className="my-4">
       <h1>Create Event</h1>
       <Form onSubmit={handleCreateEvent}>
-        <Form.Group className="mb-3">
-          <Form.Label>Organizer</Form.Label>
-          <Form.Control
-            type="text"
-            value={organizer}
-            onChange={(e) => setOrganizer(e.target.value)}
-            required
-          />
-        </Form.Group>
-        <Form.Group className="mb-3">
-          <Form.Label>Event Name</Form.Label>
-          <Form.Control
-            type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            required
-          />
-        </Form.Group>
-        <Form.Group className="mb-3">
-          <Form.Label>Title</Form.Label>
-          <Form.Control
-            type="text"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            required
-          />
-        </Form.Group>
-        <Form.Group className="mb-3">
-          <Form.Label>Description</Form.Label>
-          <Form.Control
-            as="textarea"
-            rows={3}
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            required
-          />
-        </Form.Group>
-        <Form.Group className="mb-3">
-          <Form.Label>Date</Form.Label>
-          <Form.Control
-            type="date"
-            value={date}
-            onChange={(e) => setDate(e.target.value)}
-            required
-          />
-        </Form.Group>
-        <Form.Group className="mb-3">
-          <Form.Label>Location</Form.Label>
-          <Form.Control
-            type="text"
-            value={location}
-            onChange={(e) => setLocation(e.target.value)}
-            required
-          />
-        </Form.Group>
-        <Form.Group className="mb-3">
-          <Form.Label>Image URL</Form.Label>
-          <Form.Control
-            type="text"
-            value={imageUrl}
-            onChange={(e) => setImageUrl(e.target.value)}
-            required
-          />
-        </Form.Group>
+        {['organizer', 'name', 'title', 'description', 'date', 'location', 'imageUrl'].map((field) => (
+          <Form.Group className="mb-3" key={field}>
+            <Form.Label>{field.charAt(0).toUpperCase() + field.slice(1)}</Form.Label>
+            <Form.Control
+              type={field === 'description' ? 'textarea' : field === 'date' ? 'date' : 'text'}
+              name={field}
+              value={formData[field]}
+              onChange={handleChange}
+              required
+              as={field === 'description' ? 'textarea' : 'input'}
+              rows={field === 'description' ? 3 : undefined}
+            />
+          </Form.Group>
+        ))}
         <Button variant="primary" type="submit" disabled={loading}>
           {loading ? (
             <>
-              <Spinner
-                as="span"
-                animation="border"
-                size="sm"
-                role="status"
-                aria-hidden="true"
-              />{' '}
-              Creating...
+              <Spinner as="span" animation="border" size="sm" role="status" aria-hidden="true" /> Creating...
             </>
           ) : (
             'Create Event'
