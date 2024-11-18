@@ -5,6 +5,7 @@ const router = express.Router();
 const Event = require('../models/Event');
 const { body, validationResult } = require('express-validator');
 const { protect, verifyUser, verifyAdmin } = require('../middleware/authMiddleware');
+const { createEvent } = require('../controllers/eventController');
 
 // Create a new event
 router.post(
@@ -120,5 +121,10 @@ router.delete('/:id', protect, verifyUser, verifyAdmin, async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 });
+
+const { createEvent } = require('../controllers/eventController');
+const { protect } = require('../middleware/authMiddleware');
+
+router.post('/events', protect, createEvent);
 
 module.exports = router;

@@ -5,7 +5,17 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const dotenv = require('dotenv');
 const { registerUser, loginUser } = require('../controllers/userController');
+const { check } = require('express-validator');
 
+router.post(
+  '/register',
+  [
+    check('name', 'Name is required').not().isEmpty(),
+    check('email', 'Please include a valid email').isEmail(),
+    check('password', 'Please enter a password with 6 or more characters').isLength({ min: 6 })
+  ],
+  registerUser
+);
 dotenv.config();
 
 // 사용자 회원가입 라우트

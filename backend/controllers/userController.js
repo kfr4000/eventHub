@@ -1,66 +1,81 @@
 // backend/controllers/userController.js
 
-const User = require('../models/User');
-const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+const User = require('../models/User');
+const { validationResult } = require('express-validator');
 
-// 사용자 회원가입
+// Register a new user
 exports.registerUser = async (req, res) => {
-  const { username, email, password } = req.body;
+  // Validate the request
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+
+  const { name, email, password } = req.body;
 
   try {
-    // 사용자 존재 여부 확인
-    const userExists = await User.findOne({ email });
-    if (userExists) {
-      return res.status(400).json({ message: 'User already exists' });
+    // Check if the user already exists
+    let user = await User.findOne({ email });
+    if (user) {
+      return res.status(400).json({ msg: 'User already exists' });
     }
 
-    // 비밀번호 해시화
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(password, salt);
-
-    // 사용자 생성
-    const user = await User.create({
-      username,
+    // Create a new user instance
+    user = new User({
+      name,
       email,
-      password: hashedPassword,
+      password
     });
 
-    // JWT 토큰 생성
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
-      expiresIn: '30d',
-    });
+    // Hash the password
+    const salt = await bcrypt.genSalt(10);
+    user.password = await bcrypt.hash(password, salt);
 
-    res.status(201).json({
-      _id: user._id,
-      username: user.username,
-      email: user.email,
-      token,
-    });
-  } catch (error) {
-    console.error('Error registering user:', error);
-    res.status(500).json({ message: 'Error registering user' });
+    // Save the user to the database
+    await user.save();
+
+    // Generate a JWT token
+    const payload = {
+      user: {
+        id: user.id
+      }
+    };
+
+    jwt.sign(
+      payload,
+      process.env.JWT_SECRET,
+      { expiresIn: '1h' },
+      (err, token) => {
+        if (err) throw err;
+        res.status(201).json({ token });
+      }
+    );
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Server error');
   }
 };
 
-// 사용자 로그인
+// Login user
 exports.loginUser = async (req, res) => {
   const { email, password } = req.body;
 
   try {
-    // 이메일로 사용자 찾기
+    // Find user by email
     const user = await User.findOne({ email });
     if (!user) {
       return res.status(401).json({ message: 'Invalid email or password' });
     }
 
-    // 비밀번호 검증
+    // Validate password
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       return res.status(401).json({ message: 'Invalid email or password' });
     }
 
-    // JWT 토큰 생성
+    // Generate JWT token
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
       expiresIn: '30d',
     });
@@ -117,7 +132,7 @@ exports.updateUserProfile = async (req, res) => {
 
     const updatedUser = await user.save();
 
-    // JWT 토큰 생성
+    // Generate JWT token
     const token = jwt.sign({ id: updatedUser._id }, process.env.JWT_SECRET, {
       expiresIn: '30d',
     });

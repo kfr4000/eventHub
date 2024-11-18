@@ -11,18 +11,21 @@ export default function EventCard({ event, index }) {
     return null; // 이벤트 데이터가 유효하지 않으면 아무것도 렌더링하지 않음
   }
 
+  // 이미지 URL이 유효하지 않을 경우 기본 이미지 사용
+  const imageUrl = event.imageUrl && event.imageUrl !== '' ? event.imageUrl : `https://via.placeholder.com/300x200?text=Sample+Event+${index + 1}`;
+
   return (
     <Col md={4} className="mb-4">
       <Card>
         <Card.Img
           variant="top"
-          src={event.imageUrl || `https://via.placeholder.com/300x200?text=Sample+Event+${index + 1}`}
+          src={imageUrl}
           alt={event.title || `Sample Event ${index + 1}`}
         />
         <Card.Body>
           <Card.Title>{event.title}</Card.Title>
           <Card.Text>{event.description || 'Join us for an exciting event you will never forget.'}</Card.Text>
-          <Link href={`/event/${event._id || `sample-event-${index + 1}`}`} passHref>
+          <Link href={`/event/${event._id || `sample-event-${index + 1}`}`} passHref legacyBehavior>
             <Button variant="primary">View Details</Button>
           </Link>
         </Card.Body>

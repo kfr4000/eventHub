@@ -2,19 +2,22 @@ const Event = require('../models/Event');
 
 // 이벤트 생성
 exports.createEvent = async (req, res) => {
-  const { name, description, date, location } = req.body;
+  const { title, description, date, location, imageUrl } = req.body;
 
   try {
-    const event = await Event.create({
-      name,
+    const event = new Event({
+      title,
       description,
       date,
       location,
-      organizer: req.user.id, // 인증된 사용자 정보를 사용
+      imageUrl,
+      user: req.user.id
     });
 
-    res.status(201).json(event);
+    const createdEvent = await event.save();
+    res.status(201).json(createdEvent);
   } catch (error) {
+    console.error('Error creating event:', error);
     res.status(500).json({ message: 'Error creating event' });
   }
 };

@@ -1,9 +1,12 @@
 // frontend/src/pages/index.js
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { Container, Button, Row, Col, Navbar, Form, FormControl, Carousel, Nav, Dropdown, Spinner } from 'react-bootstrap';
-import Image from 'next/image';
+import { Container, Row, Spinner } from 'react-bootstrap';
 import EventCard from '../components/EventCard';
+import NavbarComponent from '../components/Navbar';
+import HeroSection from '../components/HeroSection';
+import CategorySection from '../components/CategorySection';
+import DiscoverSection from '../components/DiscoverSection';
 
 export default function Home() {
   const [events, setEvents] = useState([]);
@@ -74,100 +77,23 @@ export default function Home() {
   }
 
   return (
-    <Container>
-      <Navbar bg="light" expand="lg" className="sticky-top">
-        <Container>
-          <Navbar.Brand href="/">EventHub</Navbar.Brand>
-          <Navbar.Toggle aria-controls="basic-navbar-nav" />
-          <Navbar.Collapse id="basic-navbar-nav">
-            <Nav className="me-auto">
-              <Nav.Link href="/">Find Events</Nav.Link>
-              <Nav.Link href="/CreateEvent">Create Events</Nav.Link>
-            </Nav>
-            <Form className="d-flex" onSubmit={handleSearch}>
-              <FormControl
-                type="search"
-                placeholder="Search for events"
-                className="me-2"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-              <FormControl
-                type="text"
-                placeholder="Location"
-                className="me-2"
-                value={location}
-                onChange={(e) => setLocation(e.target.value)}
-              />
-              <Dropdown onSelect={(eventKey) => setEventType(eventKey)} className="me-2">
-                <Dropdown.Toggle variant="outline-secondary">
-                  {eventType || 'Event Type'}
-                </Dropdown.Toggle>
-                <Dropdown.Menu>
-                  {['', 'Music', 'Nightlife', 'Arts', 'Sports', 'Business', 'Food'].map((type) => (
-                    <Dropdown.Item key={type} eventKey={type}>{type || 'All'}</Dropdown.Item>
-                  ))}
-                </Dropdown.Menu>
-              </Dropdown>
-              <Button variant="outline-success" type="submit">Search</Button>
-            </Form>
-            <Nav>
-              <Nav.Link href="/login" className="ms-3">Log In</Nav.Link>
-              <Nav.Link href="/register" className="ms-2">Sign Up</Nav.Link>
-            </Nav>
-          </Navbar.Collapse>
-        </Container>
-      </Navbar>
-
-      <Carousel className="my-4">
-        {['Autumn Fairs & Festivals', 'Supper Club Parties', 'Stay Connected with Local Events'].map((caption, index) => (
-          <Carousel.Item key={index}>
-            <Image
-              className="d-block w-100"
-              src={`https://via.placeholder.com/1200x400?text=${caption.replace(/\s/g, '+')}`}
-              alt={`${caption} slide`}
-              width={1200}
-              height={400}
-            />
-            <Carousel.Caption>
-              <h3>{caption}</h3>
-              <p>Enjoy the best {caption.toLowerCase()} this season.</p>
-            </Carousel.Caption>
-          </Carousel.Item>
-        ))}
-      </Carousel>
-
-      <h2>Explore Events by Category</h2>
-      <Row className="text-center my-4">
-        {['Music', 'Nightlife', 'Arts', 'Sports', 'Business', 'Food'].map((category) => (
-          <Col key={category} md={2} className="mb-4">
-            <div className="event-category-icon">
-              <Image src={`https://via.placeholder.com/100?text=${category}`} alt={category} width={100} height={100} />
-              <h5>{category}</h5>
-            </div>
-          </Col>
-        ))}
-      </Row>
-
-      <h2>Recommended for You</h2>
-      <Row>
-        {events.slice(0, 3).map((event, index) => (
-          <EventCard key={event._id || index} event={event} index={index} />
-        ))}
-      </Row>
-
-      <h2>Upcoming Events</h2>
-      <Row>
-        {events.length > 0 ? (
-          events.map((event, index) => (
-            <EventCard key={event._id || index} event={event} index={index} />
-          ))
-        ) : (
-          Array.from({ length: 6 }).map((_, index) => (
-            <EventCard key={index} event={{ title: `Sample Event ${index + 1}`, description: "Join us for an exciting event you will never forget." }} index={index} />
-          ))
-        )}
-      </Row>
+    <Container fluid>
+      <NavbarComponent handleSearch={handleSearch} searchTerm={searchTerm} setSearchTerm={setSearchTerm} location={location} setLocation={setLocation} eventType={eventType} setEventType={setEventType} />
+      <HeroSection />
+      <div className="featured-events-section py-4">
+        <h2 className="mb-4">Upcoming Events</h2>
+        <Row>
+          {events.length > 0 ? (
+            events.map((event, index) => (
+              <EventCard key={event._id || index} event={event} index={index} />
+            ))
+          ) : (
+            <p>No events available at the moment.</p>
+          )}
+        </Row>
+      </div>
+      <CategorySection />
+      <DiscoverSection />
     </Container>
   );
 }

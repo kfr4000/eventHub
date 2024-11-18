@@ -1,5 +1,5 @@
 const request = require('supertest');
-const app = require('../index'); // Express 앱을 가져옴
+const app = require('../index'); // Express app
 
 describe('GET /api/events', () => {
   it('should return a list of events', async () => {
