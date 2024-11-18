@@ -31,6 +31,10 @@ const eventSchema = new mongoose.Schema({
     type: String,
     required: [true, 'Image URL is required'],
   },
+  attendees: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+  }],
 });
 
 module.exports = mongoose.model('Event', eventSchema);

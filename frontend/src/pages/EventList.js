@@ -2,13 +2,15 @@
 
 import React, { useState, useEffect } from 'react';
 import { fetchEvents } from '../utils/api';
-import { Card, Button, Container, Row, Col, Spinner } from 'react-bootstrap';
+import { Container, Row, Col, Card, Spinner, Alert, Button, Form } from 'react-bootstrap';
 import Link from 'next/link';
 
 export default function EventList() {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState(null);
+  const [category, setCategory] = useState('All');
+  const [date, setDate] = useState('');
 
   useEffect(() => {
     const loadEvents = async () => {
@@ -24,6 +26,21 @@ export default function EventList() {
     loadEvents();
   }, []);
 
+  const handleCategoryChange = (e) => {
+    setCategory(e.target.value);
+  };
+
+  const handleDateChange = (e) => {
+    setDate(e.target.value);
+  };
+
+  const filteredEvents = events.filter((event) => {
+    return (
+      (category === 'All' || event.category === category) &&
+      (!date || new Date(event.date).toLocaleDateString() === new Date(date).toLocaleDateString())
+    );
+  });
+
   if (loading) {
     return (
       <Container className="my-4">
@@ -36,34 +53,55 @@ export default function EventList() {
 
   return (
     <Container className="my-4">
-      <h1>All Events</h1>
-      {message && <p>{message}</p>}
       <Row>
-        {events.length > 0 ? (
-          events.map((event) => (
-            <Col key={event._id} md={4} className="mb-4">
-              <Card>
-                <Card.Body>
-                  <Card.Title>{event.name}</Card.Title>
-                  <Card.Text>
-                    {event.description.length > 100
-                      ? event.description.substring(0, 100) + '...'
-                      : event.description}
-                  </Card.Text>
-                  <Card.Text>
-                    <strong>Date: </strong>
-                    {new Date(event.date).toLocaleDateString()}
-                  </Card.Text>
-                  <Link href={`/events/${event._id}`} passHref>
-                    <Button variant="primary">View Details</Button>
-                  </Link>
-                </Card.Body>
-              </Card>
-            </Col>
-          ))
-        ) : (
-          <p>No events available.</p>
-        )}
+        <Col md={3}>
+          <h4>Filters</h4>
+          <Form>
+            <Form.Group controlId="category">
+              <Form.Label>Category</Form.Label>
+              <Form.Control as="select" value={category} onChange={handleCategoryChange}>
+                <option>All</option>
+                <option>Music</option>
+                <option>Sports</option>
+                <option>Business</option>
+              </Form.Control>
+            </Form.Group>
+            <Form.Group controlId="date">
+              <Form.Label>Date</Form.Label>
+              <Form.Control type="date" value={date} onChange={handleDateChange} />
+            </Form.Group>
+          </Form>
+        </Col>
+        <Col md={9}>
+          <h2>Events</h2>
+          <Row>
+            {filteredEvents.length > 0 ? (
+              filteredEvents.map((event) => (
+                <Col key={event._id} md={4} className="mb-4">
+                  <Card>
+                    <Card.Body>
+                      <Card.Title>{event.name}</Card.Title>
+                      <Card.Text>
+                        {event.description.length > 100
+                          ? event.description.substring(0, 100) + '...'
+                          : event.description}
+                      </Card.Text>
+                      <Card.Text>
+                        <strong>Date: </strong>
+                        {new Date(event.date).toLocaleDateString()}
+                      </Card.Text>
+                      <Link href={`/events/${event._id}`} passHref>
+                        <Button variant="primary">View Details</Button>
+                      </Link>
+                    </Card.Body>
+                  </Card>
+                </Col>
+              ))
+            ) : (
+              <p>No events available.</p>
+            )}
+          </Row>
+        </Col>
       </Row>
     </Container>
   );

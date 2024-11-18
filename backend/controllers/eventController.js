@@ -75,3 +75,31 @@ exports.getEvents = async (req, res) => {
     res.status(500).json({ message: 'Error fetching events' });
   }
 };
+
+// Fetch event by ID
+// Fetch event by ID
+exports.getEventById = async (req, res) => {
+  try {
+    const event = await Event.findById(req.params.id);
+    if (!event) {
+      return res.status(404).json({ message: 'Event not found' });
+    }
+    res.status(200).json(event);
+  } catch (error) {
+    console.error('Error fetching event:', error);
+    res.status(500).json({ message: 'Error fetching event' });
+  }
+};
+
+exports.getEventById = async (req, res) => {
+  try {
+    const event = await Event.findById(req.params.id);
+    if (!event) {
+      return res.status(404).json({ message: 'Event not found' });
+    }
+    res.status(200).json(event);
+  } catch (error) {
+    console.error('Error fetching event:', error);
+    res.status(500).json({ message: 'Error fetching event' });
+  }
+};

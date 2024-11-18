@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/router';
-import { Container, Row, Col, Image, Button, Spinner } from 'react-bootstrap';
+import { Container, Row, Col, Card, Spinner, Alert, Button, Image } from 'react-bootstrap';
 
 export default function EventDetail() {
   const [event, setEvent] = useState(null);
@@ -14,18 +14,14 @@ export default function EventDetail() {
   const fetchEventDetails = useCallback(async () => {
     if (!id) return;
     try {
-      const controller = new AbortController();
-      const signal = controller.signal;
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/events/${id}`, { signal });
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/events/${id}`);
       if (!response.ok) {
         throw new Error('Failed to fetch event details');
       }
       const data = await response.json();
       setEvent(data);
     } catch (err) {
-      if (err.name !== 'AbortError') {
-        setError(err.message);
-      }
+      setError(err.message);
     } finally {
       setLoading(false);
     }
@@ -57,19 +53,18 @@ export default function EventDetail() {
   }
 
   return (
-    <Container className="my-4">
-      <Row>
-        <Col md={6}>
+    <Container>
+      <Row className="my-4">
+        <Col md={8}>
           <Image src={event.imageUrl || 'https://via.placeholder.com/600x400?text=No+Image+Available'} alt={event.title} fluid />
-        </Col>
-        <Col md={6}>
           <h1>{event.title}</h1>
-          <p><strong>Organizer:</strong> {event.organizer}</p>
-          <p><strong>Event Name:</strong> {event.name}</p>
-          <p><strong>Description:</strong> {event.description}</p>
-          <p><strong>Date:</strong> {new Date(event.date).toLocaleDateString()}</p>
-          <p><strong>Location:</strong> {event.location}</p>
-          <Button variant="primary" onClick={() => router.push('/')}>Back to Events</Button>
+          <p>{event.description}</p>
+        </Col>
+        <Col md={4}>
+          <h4>Event Details</h4>
+          <p>Date: {new Date(event.date).toLocaleDateString()}</p>
+          <p>Location: {event.location}</p>
+          <Button variant="primary" onClick={() => router.push('/')}>Join Event</Button>
         </Col>
       </Row>
     </Container>

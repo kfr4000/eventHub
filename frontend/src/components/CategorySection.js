@@ -3,7 +3,7 @@
 import React from 'react';
 import { Container, Row, Col, Image } from 'react-bootstrap';
 
-export default function CategorySection() {
+function CategorySection() {
   return (
     <Container className="category-section my-4">
       <h2 className="mb-4">Explore Events by Category</h2>
@@ -20,3 +20,5 @@ export default function CategorySection() {
     </Container>
   );
 }
+
+export default CategorySection;

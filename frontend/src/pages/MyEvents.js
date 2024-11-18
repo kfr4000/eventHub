@@ -23,7 +23,7 @@ export default function MyEvents() {
         const joinedData = await getUserJoinedEvents(token);
         setHostedEvents(hostedData);
         setJoinedEvents(joinedData);
-      } catch (error) {
+      } catch {
         setMessage('Failed to load events. Please try again later.');
       } finally {
         setLoading(false);

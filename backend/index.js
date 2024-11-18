@@ -8,6 +8,11 @@ const userRoutes = require('./routes/userRoutes');
 
 dotenv.config({ path: '../.env' });
 
+if (!process.env.MONGO_URI || !process.env.JWT_SECRET) {
+  console.error('Missing required environment variables');
+  process.exit(1);
+}
+
 // Connect to the database
 connectDB();
 
@@ -22,4 +27,8 @@ app.use('/api/events', eventRoutes);
 app.use('/api/users', userRoutes);
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`))
+  .on('error', (err) => {
+    console.error('Failed to start server:', err);
+    process.exit(1);
+  });
