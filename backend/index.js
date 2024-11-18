@@ -1,11 +1,12 @@
 const express = require('express');
+const path = require('path');
 const connectDB = require('./config/db');
 const dotenv = require('dotenv');
 const cors = require('cors');
 const eventRoutes = require('./routes/eventRoutes');
 const userRoutes = require('./routes/userRoutes');
 
-dotenv.config();
+dotenv.config({ path: '../.env' });
 
 // Connect to the database
 connectDB();

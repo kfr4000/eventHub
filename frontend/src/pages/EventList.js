@@ -4,7 +4,6 @@ import React, { useState, useEffect } from 'react';
 import { fetchEvents } from '../utils/api';
 import { Card, Button, Container, Row, Col, Spinner } from 'react-bootstrap';
 import Link from 'next/link';
-import EventCard from '../components/EventCard';
 
 export default function EventList() {
   const [events, setEvents] = useState([]);

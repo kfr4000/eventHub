@@ -16,9 +16,12 @@ const Login = () => {
     setMessage('');
 
     try {
-      const url = `${process.env.NEXT_PUBLIC_API_URL}/users/login`;
-      console.log('Logging in at URL:', url); // Debugging line
-      const response = await axios.post(url, {
+      const url = process.env.NEXT_PUBLIC_API_URL;
+      console.log('API URL:', url); // 디버깅을 위해 추가
+      if (!url) {
+        throw new Error('API URL is not defined');
+      }
+      const response = await axios.post(`${url}/users/login`, {
         email,
         password,
       });
